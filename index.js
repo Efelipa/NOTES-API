@@ -2,6 +2,18 @@
 const express = require('express')
 // Creamos nuestra aplicación de express, que será una función
 const app = express()
+// Importamos cors para poder usar el servidor desde cualquier origen
+const cors = require('cors')
+// Importamos el módulo morgan, que será una función
+const morgan = require('morgan')
+// Configuramos el token morgan
+morgan.token('body', function (req,res) {
+  if(req.method === 'POST') {
+    return JSON.stringify(req.body)
+  } else {
+    return ''
+  }
+})
 
 // Definimos un array de notas, que será un array de objetos para ser convertidos a JSON
 let notes = [
@@ -39,15 +51,17 @@ let notes = [
 
 // Hacemos uso de la función express.json() para poder recibir datos en formato JSON desde el cliente.
 app.use(express.json())
-
+// Agregamos el middleware morgan al servidor
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+app.use(cors())
 // Utility functions
-// Función para generar un id único. El método Math.max devuelve el máximo de los argumentos. El método map itera sobre cada elemento del array y devuelve un nuevo array con los resultados de la función
-const generateId = () => {
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(note => note.id))
-    : 0
-  return maxId + 1
-}
+  // Función para generar un id único. El método Math.max devuelve el máximo de los argumentos. El método map itera sobre cada elemento del array y devuelve un nuevo array con los resultados de la función
+  const generateId = () => {
+    const maxId = notes.length > 0
+      ? Math.max(...notes.map(note => note.id))
+      : 0
+    return maxId + 1
+  }
 
 // Definimos una ruta para el servidor, que será la raíz de la app. Esta devuelve un HTML con el mensaje de HELLO WORLD.
 app.get('/', (request, response) => {
@@ -101,6 +115,11 @@ app.delete('/api/notes/:id', (request, response) => {
   notes = notes.filter(note => note.id !== id)
   response.status(204).end()
 })
+
+// Definimos un middleware después de las rutas para testar el funcionamiento de este middleware.
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
 // Definimos el puerto de mi servidor.
 const PORT = 3001
