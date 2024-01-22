@@ -4,6 +4,8 @@ const express = require('express')
 const app = express()
 // Importamos cors para poder usar el servidor desde cualquier origen
 const cors = require('cors')
+// Importamos static 
+const static = require('static')
 // Importamos el módulo morgan, que será una función
 const morgan = require('morgan')
 // Configuramos el token morgan
@@ -51,6 +53,8 @@ let notes = [
 
 // Hacemos uso de la función express.json() para poder recibir datos en formato JSON desde el cliente.
 app.use(express.json())
+// Implementamos el middleware static para que el servidor pueda acceder a los archivos estáticos de la carpeta build
+app.use(express.static('build'))
 // Agregamos el middleware morgan al servidor
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(cors())
